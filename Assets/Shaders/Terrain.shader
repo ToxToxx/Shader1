@@ -6,6 +6,8 @@ Shader "Learning/Environment/Terrain"
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
         _Glossiness ("Smoothness", Range(0,1)) = 0.5
         _Metallic ("Metallic", Range(0,1)) = 0.0
+        _Saturation ("Saturation", Range(0,3)) = 2.0
+        _SinPick ("Sin Pick", Float) = 6.5
     }
     SubShader
     {
@@ -28,6 +30,8 @@ Shader "Learning/Environment/Terrain"
 
         half _Glossiness;
         half _Metallic;
+        half _Saturation;
+        float _SinPick;
         fixed4 _Color;
 
         // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
@@ -40,8 +44,10 @@ Shader "Learning/Environment/Terrain"
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
             float2 uv = IN.uv_MainTex;
+            uv.y += sin(uv.x * _SinPick + _Time.y);
             fixed4 c = tex2D(_MainTex, uv);
-            o.Albedo = fixed3(uv.x, uv.y, 0.0);
+            c = lerp(_Color, c, uv.x * _Saturation);
+            o.Albedo = c.rgb;
             // Metallic and smoothness come from slider variables
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
